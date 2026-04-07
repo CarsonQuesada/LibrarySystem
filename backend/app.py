@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session # type: ignore
 from models import db, Book, LibraryUser, Loan
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder="../frontend/templates", 
+            static_folder="../frontend/static"
+            )
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
 app.config['SECRET_KEY'] = 'secret'
 
