@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>Your Loans</h2>
+
+<table class="table">
+  <tr>
+    <th>Book ID</th>
+    <th>Action</th>
+  </tr>
+
+  {% for loan in loans %}
+  <tr>
+    <td>{{ loan.book_id }}</td>
+    <td>
+      <a href="/return/{{ loan.id }}" class="btn btn-danger">Return</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>Books</h2>
+
+<form method="POST" action="/add_book" class="mb-3">
+  <input name="title" placeholder="Title" required />
+  <input name="author" placeholder="Author" required />
+  <input name="isbn" placeholder="ISBN" />
+  <input name="copies" placeholder="Copies" type="number" />
+  <button class="btn btn-success">Add Book</button>
+</form>
+
+<table class="table">
+  <tr>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Available</th>
+    <th>Action</th>
+  </tr>
+
+  {% for book in books %}
+  <tr>
+    <td>{{ book.title }}</td>
+    <td>{{ book.author }}</td>
+    <td>{{ book.available_copies }}</td>
+    <td>
+      <a href="/borrow/{{ book.id }}" class="btn btn-primary">Borrow</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}
