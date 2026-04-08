@@ -34,6 +34,33 @@ def add_book():
     db.session.commit()
     return redirect("/")
 
+# ---------------- REGISTER ----------------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        password = request.form["password"]
+
+        # Check if user already exists
+        existing_user = LibraryUser.query.filter_by(email=email).first()
+        if existing_user:
+            return "User already exists!"
+
+        new_user = LibraryUser(
+            name=name,
+            email=email,
+            password=password
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        session["user_id"] = new_user.id
+        return redirect("/")
+
+    return render_template("register.html")
+
 # ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
