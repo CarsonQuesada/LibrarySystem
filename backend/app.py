@@ -127,6 +127,12 @@ def login():
             return redirect("/")
     return render_template("login.html")
 
+# ---------------- LOGOUT ----------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
 # ---------------- BORROW ----------------
 @app.route("/borrow/<int:book_id>")
 def borrow(book_id):

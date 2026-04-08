@@ -11,7 +11,11 @@
     <nav class="mb-4">
       <a href="/" class="btn btn-primary">Home</a>
       <a href="/account" class="btn btn-secondary">Account</a>
+      {% if session.get("user_id") %}
+      <a href="/logout" class="btn btn-danger">Logout</a>
+      {% else %}
       <a href="/login" class="btn btn-dark">Login</a>
+      {% endif %}
     </nav>
 
     {% block content %}{% endblock %}
