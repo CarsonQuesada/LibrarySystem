@@ -6,13 +6,69 @@ app = Flask(__name__,
             template_folder="../frontend/templates", 
             static_folder="../frontend/static"
             )
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
+import os
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(BASE_DIR, "database", "library.db")
+
+os.makedirs(os.path.join(BASE_DIR, "database"), exist_ok=True)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SECRET_KEY'] = 'secret'
+
 
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+    # ---------------- DUMMY USERS ----------------
+    if not LibraryUser.query.first():
+        user1 = LibraryUser(
+            name="Test User",
+            email="test@test.com",
+            password="1234",
+            is_librarian=False
+        )
+
+        user2 = LibraryUser(
+            name="Admin",
+            email="admin@test.com",
+            password="admin",
+            is_librarian=True
+        )
+
+        db.session.add_all([user1, user2])
+        db.session.commit()
+
+    # ---------------- DUMMY BOOKS ----------------
+    if not Book.query.first():
+        book1 = Book(
+            title="The Great Gatsby",
+            author="F. Scott Fitzgerald",
+            isbn="111",
+            copy_count=5,
+            available_copies=5
+        )
+
+        book2 = Book(
+            title="1984",
+            author="George Orwell",
+            isbn="222",
+            copy_count=3,
+            available_copies=3
+        )
+
+        book3 = Book(
+            title="To Kill a Mockingbird",
+            author="Harper Lee",
+            isbn="333",
+            copy_count=4,
+            available_copies=4
+        )
+
+        db.session.add_all([book1, book2, book3])
+        db.session.commit()
 
 # ---------------- HOME ----------------
 @app.route("/")
