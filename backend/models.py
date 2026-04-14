@@ -7,7 +7,7 @@ class LibraryUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(200), nullable=False)
     is_librarian = db.Column(db.Boolean, default=False)
 
 class Book(db.Model):

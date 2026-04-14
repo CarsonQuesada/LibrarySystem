@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, session # type: ignore
 from models import db, Book, LibraryUser, Loan
 from datetime import datetime
+from auth import hash_password
+from auth import verify_password
 
 app = Flask(__name__, 
             template_folder="../frontend/templates", 
@@ -98,16 +100,24 @@ def register():
         name = request.form["name"]
         email = request.form["email"]
         password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
 
-        # Check if user already exists
+        # Check passwords match
+        if password != confirm_password:
+            return "Passwords do not match!"
+
+        # Check if user exists
         existing_user = LibraryUser.query.filter_by(email=email).first()
         if existing_user:
             return "User already exists!"
 
+        # Hash password
+        hashed_password = hash_password(password)
+
         new_user = LibraryUser(
             name=name,
             email=email,
-            password=password
+            password=hashed_password
         )
 
         db.session.add(new_user)
@@ -123,7 +133,7 @@ def register():
 def login():
     if request.method == "POST":
         user = LibraryUser.query.filter_by(email=request.form["email"]).first()
-        if user and user.password == request.form["password"]:
+        if user and verify_password(user.password, request.form["password"]):
             session["user_id"] = user.id
             return redirect("/")
     return render_template("login.html")
