@@ -74,7 +74,8 @@ with app.app_context():
 @app.route("/")
 def home():
     books = Book.query.all()
-    return render_template("index.html", books=books)
+    logged_in = "user_id" in session
+    return render_template("index.html", books=books, logged_in=logged_in)
 
 # ---------------- ADD BOOK ----------------
 @app.route("/add_book", methods=["POST"])
@@ -131,7 +132,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/")
+    return redirect("/login")
 
 # ---------------- BORROW ----------------
 @app.route("/borrow/<int:book_id>")
