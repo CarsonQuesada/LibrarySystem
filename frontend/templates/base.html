@@ -9,10 +9,23 @@
   </head>
   <body class="container mt-4">
     {% if session.get("user_id") %}
-    <nav class="mb-4">
-      <a href="/" class="btn btn-primary">Home</a>
-      <a href="/account" class="btn btn-secondary">Account</a>
-      <a href="/logout" class="btn btn-danger">Logout</a>
+    <nav class="mb-4 d-flex justify-content-between align-items-center">
+      <!-- LEFT SIDE -->
+      <div>
+        <a href="/" class="btn btn-primary">Home</a>
+        <a href="/account" class="btn btn-secondary">Account</a>
+        <a href="/logout" class="btn btn-danger">Logout</a>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      {% if current_user %}
+      <div>
+        <span class="me-2 fw-bold">
+          {{ current_user.name }} {% if current_user.is_librarian %} (Admin) {%
+          else %} (User) {% endif %}
+        </span>
+      </div>
+      {% endif %}
     </nav>
     {% endif %} {% block content %}{% endblock %}
   </body>

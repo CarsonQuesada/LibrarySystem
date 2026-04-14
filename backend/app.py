@@ -27,18 +27,18 @@ with app.app_context():
     # ---------------- DUMMY USERS ----------------
     if not LibraryUser.query.first():
         user1 = LibraryUser(
-            name="Test User",
-            email="test@test.com",
-            password="1234",
-            is_librarian=False
-        )
+        name="Test User",
+        email="test@test.com",
+        password=hash_password("1234"),
+        is_librarian=False
+    )
 
         user2 = LibraryUser(
-            name="Admin",
-            email="admin@test.com",
-            password="admin",
-            is_librarian=True
-        )
+        name="Admin",
+        email="admin@test.com",
+        password=hash_password("admin"),
+        is_librarian=True
+    )
 
         db.session.add_all([user1, user2])
         db.session.commit()
@@ -72,6 +72,14 @@ with app.app_context():
         db.session.add_all([book1, book2, book3])
         db.session.commit()
 
+# ---------------- CONTEXT PROCESSOR ----------------
+@app.context_processor
+def inject_user():
+    if "user_id" in session:
+        user = LibraryUser.query.get(session["user_id"])
+        return dict(current_user=user)
+    return dict(current_user=None)
+
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -82,6 +90,18 @@ def home():
 # ---------------- ADD BOOK ----------------
 @app.route("/add_book", methods=["POST"])
 def add_book():
+    # Step 1: Must be logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # Step 2: Get current user
+    user = LibraryUser.query.get(session["user_id"])
+
+    # Step 3: Check if admin
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    # Step 4: Add book (only admin reaches here)
     book = Book(
         title=request.form["title"],
         author=request.form["author"],
@@ -89,8 +109,10 @@ def add_book():
         copy_count=int(request.form["copies"]),
         available_copies=int(request.form["copies"])
     )
+
     db.session.add(book)
     db.session.commit()
+
     return redirect("/")
 
 # ---------------- REGISTER ----------------
