@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, flash
+from flask import Flask, render_template, request, redirect, session, flash # type: ignore
 from models import db, Book, LibraryUser, Loan
 from datetime import datetime
 from auth import hash_password, verify_password
