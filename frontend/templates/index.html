@@ -16,7 +16,22 @@
     <td>{{ book.author }}</td>
     <td>{{ book.available_copies }}</td>
     <td>
-      <a href="/borrow/{{ book.id }}" class="btn btn-primary">Borrow</a>
+      <div class="d-flex gap-2">
+        {% if book.available_copies > 0 %}
+        <a href="/borrow/{{ book.id }}" class="btn btn-primary btn-sm"
+          >Borrow</a
+        >
+        {% else %}
+        <button class="btn btn-secondary btn-sm" disabled>Unavailable</button>
+        {% endif %} {% if current_user and current_user.is_librarian %}
+        <a
+          href="/admin/books/{{ book.id }}/edit"
+          class="btn btn-warning btn-sm"
+        >
+          Edit
+        </a>
+        {% endif %}
+      </div>
     </td>
   </tr>
   {% endfor %}

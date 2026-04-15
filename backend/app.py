@@ -143,6 +143,35 @@ def admin_loans():
 
     return render_template("admin_loans.html", loans=loans)
 
+# ---------------- ADMIN: EDIT BOOK ----------------
+@app.route("/admin/books/<int:book_id>/edit", methods=["GET", "POST"])
+def edit_book(book_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    book = Book.query.get(book_id)
+
+    if request.method == "POST":
+        book.title = request.form["title"]
+        book.author = request.form["author"]
+        book.isbn = request.form["isbn"]
+
+        copy_count = int(request.form["copy_count"])
+        book.copy_count = copy_count
+
+        # 🔥 Keep available copies consistent
+        if book.available_copies > copy_count:
+            book.available_copies = copy_count
+
+        db.session.commit()
+        return redirect("/admin/dashboard")
+
+    return render_template("edit_book.html", book=book)
+
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
