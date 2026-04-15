@@ -216,6 +216,19 @@ def account():
         user=user,
         loans=loans
     )
+# ---------------- ADMIN: VIEW LOANS ----------------
+@app.route("/admin/loans")
+def admin_loans():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    loans = Loan.query.all()
+
+    return render_template("admin_loans.html", loans=loans)
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

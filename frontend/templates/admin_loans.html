@@ -1,0 +1,43 @@
+{% extends "base.html" %} {% block content %}
+
+<h2 class="mb-4">All Loans (Admin)</h2>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Book</th>
+      <th>Author</th>
+      <th>Loan Date</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for loan in loans %}
+    <tr>
+      <td>{{ loan.user.name }}</td>
+      <td>{{ loan.book.title }}</td>
+      <td>{{ loan.book.author }}</td>
+      <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
+      <td>
+        {% if loan.returned %}
+        <span class="badge bg-success">Returned</span>
+        {% else %}
+        <span class="badge bg-warning text-dark">Active</span>
+        {% endif %}
+      </td>
+
+      <td>
+        {% if not loan.returned %}
+        <a href="/return/{{ loan.id }}" class="btn btn-warning btn-sm">
+          Force Return
+        </a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

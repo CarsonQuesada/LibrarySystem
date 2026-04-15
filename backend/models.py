@@ -26,7 +26,7 @@ class Loan(db.Model):
     returned = db.Column(db.Boolean, default=False)
 
     book = db.relationship('Book')
-
+    user = db.relationship('LibraryUser')
 
 class WaitlistEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
