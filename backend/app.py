@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash
 from models import db, Book, LibraryUser, Loan
 from datetime import datetime
 from auth import hash_password, verify_password
@@ -178,9 +178,17 @@ def borrow(book_id):
 # ---------------- RETURN ----------------
 @app.route("/return/<int:loan_id>")
 def return_book(loan_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
     loan = Loan.query.get(loan_id)
 
-    if loan and not loan.returned:
+    # 🔒 Ensure the loan belongs to the current user
+    if not loan or loan.user_id != session["user_id"]:
+        flash("You cannot return this book.")
+        return redirect("/account")
+    
+    if not loan.returned:
         book = Book.query.get(loan.book_id)
 
         loan.returned = True
@@ -196,12 +204,18 @@ def account():
     if "user_id" not in session:
         return redirect("/login")
 
+    user = LibraryUser.query.get(session["user_id"])
+
     loans = Loan.query.filter_by(
         user_id=session["user_id"],
         returned=False
     ).all()
 
-    return render_template("account.html", loans=loans)
+    return render_template(
+        "account.html",
+        user=user,
+        loans=loans
+    )
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

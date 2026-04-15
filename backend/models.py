@@ -25,6 +25,9 @@ class Loan(db.Model):
     loan_date = db.Column(db.DateTime, default=datetime.utcnow)
     returned = db.Column(db.Boolean, default=False)
 
+    book = db.relationship('Book')
+
+
 class WaitlistEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
