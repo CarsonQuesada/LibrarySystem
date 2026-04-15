@@ -71,6 +71,27 @@ def home():
     books = Book.query.all()
     return render_template("index.html", books=books)
 
+# ---------------- ADMIN: DASHBOARD ----------------
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    total_books = Book.query.count()
+    total_users = LibraryUser.query.count()
+    active_loans = Loan.query.filter_by(returned=False).count()
+
+    return render_template(
+        "admin_dashboard.html",
+        total_books=total_books,
+        total_users=total_users,
+        active_loans=active_loans
+    )
+
 # ---------------- ADMIN: SHOW ADD BOOK PAGE ----------------
 @app.route("/admin/books/add", methods=["GET"])
 def show_add_book():
@@ -107,6 +128,20 @@ def add_book_admin():
     db.session.commit()
 
     return redirect("/")
+
+# ---------------- ADMIN: VIEW LOANS ----------------
+@app.route("/admin/loans")
+def admin_loans():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    loans = Loan.query.all()
+
+    return render_template("admin_loans.html", loans=loans)
 
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
@@ -216,19 +251,7 @@ def account():
         user=user,
         loans=loans
     )
-# ---------------- ADMIN: VIEW LOANS ----------------
-@app.route("/admin/loans")
-def admin_loans():
-    if "user_id" not in session:
-        return redirect("/login")
 
-    user = LibraryUser.query.get(session["user_id"])
-    if not user or not user.is_librarian:
-        return "Unauthorized", 403
-
-    loans = Loan.query.all()
-
-    return render_template("admin_loans.html", loans=loans)
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

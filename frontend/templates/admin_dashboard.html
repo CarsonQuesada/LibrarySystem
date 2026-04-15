@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% block content %}
+
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row">
+  <!-- BOOKS -->
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5>Total Books</h5>
+        <h2>{{ total_books }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5>Total Users</h5>
+        <h2>{{ total_users }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOANS -->
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5>Active Loans</h5>
+        <h2>{{ active_loans }}</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="my-4" />
+
+<h4>Quick Actions</h4>
+
+<div class="d-flex gap-3 mt-3">
+  <a href="/admin/books/add" class="btn btn-success">Add Book</a>
+  <a href="/admin/loans" class="btn btn-info">View Loans</a>
+</div>
+
+{% endblock %}
