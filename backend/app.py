@@ -172,6 +172,32 @@ def edit_book(book_id):
 
     return render_template("edit_book.html", book=book)
 
+# ---------------- ADMIN: DELETE BOOK ----------------
+@app.route("/admin/books/<int:book_id>/delete", methods=["POST"])
+def delete_book(book_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    book = Book.query.get(book_id)
+
+    if not book:
+        return "Book not found", 404
+
+    # 🔥 Prevent deleting if copies are borrowed
+    if book.available_copies < book.copy_count:
+        flash("Cannot delete book: copies are currently borrowed.")
+        return redirect("/")
+
+    db.session.delete(book)
+    db.session.commit()
+
+    flash("Book deleted successfully.")
+    return redirect("/")
+
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():

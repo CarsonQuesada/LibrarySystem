@@ -30,6 +30,19 @@
         >
           Edit
         </a>
+
+        <!-- 🔥 DELETE FORM GOES HERE -->
+        <form
+          method="POST"
+          action="/admin/books/{{ book.id }}/delete"
+          style="display: inline"
+          onsubmit="
+            return confirm('Are you sure you want to delete this book?');
+          "
+        >
+          <button class="btn btn-danger btn-sm">Delete</button>
+        </form>
+
         {% endif %}
       </div>
     </td>
