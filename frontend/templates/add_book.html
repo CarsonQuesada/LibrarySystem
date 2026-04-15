@@ -1,0 +1,54 @@
+{% extends "base.html" %} {% block content %}
+<h2>Add New Book</h2>
+
+<form method="post" action="/admin/books/add" class="mt-3">
+  <div class="mb-3">
+    <label for="title" class="form-label">Title</label>
+    <input id="title" name="title" type="text" class="form-control" required />
+  </div>
+
+  <div class="mb-3">
+    <label for="author" class="form-label">Author</label>
+    <input
+      id="author"
+      name="author"
+      type="text"
+      class="form-control"
+      required
+    />
+  </div>
+
+  <div class="mb-3">
+    <label for="isbn" class="form-label">ISBN</label>
+    <input id="isbn" name="isbn" type="text" class="form-control" />
+  </div>
+
+  <div class="mb-3">
+    <label for="copy_count" class="form-label">Copy Count</label>
+    <input
+      id="copy_count"
+      name="copy_count"
+      type="number"
+      min="0"
+      class="form-control"
+      required
+    />
+  </div>
+
+  <div class="mb-3">
+    <label for="available_copies" class="form-label">Available Copies</label>
+    <input
+      id="available_copies"
+      name="available_copies"
+      type="number"
+      min="0"
+      class="form-control"
+      required
+    />
+  </div>
+
+  <button type="submit" class="btn btn-success">Add Book</button>
+  <a href="/admin/books" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

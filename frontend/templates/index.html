@@ -2,13 +2,16 @@
 
 <h2>Books</h2>
 
-<form method="POST" action="/add_book" class="mb-3">
+<!-- 🔥 ONLY ADMIN CAN SEE THIS -->
+{% if current_user and current_user.is_librarian %}
+<form method="POST" action="/admin/books/add" class="mb-3">
   <input name="title" placeholder="Title" required />
   <input name="author" placeholder="Author" required />
   <input name="isbn" placeholder="ISBN" />
-  <input name="copies" placeholder="Copies" type="number" />
+  <input name="copy_count" placeholder="Copies" type="number" required />
   <button class="btn btn-success">Add Book</button>
 </form>
+{% endif %}
 
 <table class="table">
   <tr>
