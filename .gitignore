@@ -1,41 +1,41 @@
-# Prerequisites
-*.d
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Virtual environment
+venv/
+env/
+.venv/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Flask instance folder (config, db, etc.)
+instance/
 
-# Linker files
-*.ilk
+# Environment variables
+.env
+.env.*
 
-# Debugger Files
-*.pdb
+# SQLite database
+*.db
+*.sqlite3
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Logs
+*.log
 
-# Fortran module files
-*.mod
-*.smod
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.pytest_cache/
 
-# Executables
-*.exe
-*.out
-*.app
+# IDE / editor files
+.vscode/
+.idea/
 
-# debug information files
-*.dwo
+# OS files
+.DS_Store
+Thumbs.db
