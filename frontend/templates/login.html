@@ -1,30 +1,44 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
 
-<div
-  class="d-flex flex-column justify-content-center align-items-center"
-  style="height: 80vh"
->
-  <!-- 🔥 APP TITLE -->
-  <h1 class="mb-4">ECE5460 Library System</h1>
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+  <div class="w-100" style="max-width: 420px;">
+    
+    <div class="text-center mb-4">
+      <h1 class="h3 mb-2">Library System</h1>
+      <p class="text-muted mb-0">Sign in to access your account.</p>
+    </div>
 
-  <!-- LOGIN CARD -->
-  <div class="card p-4 shadow" style="width: 350px">
-    <h2 class="text-center mb-4">Login</h2>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-4 text-center">Login</h2>
 
-    <form method="POST">
-      <input name="email" placeholder="Email" class="form-control mb-3" />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        class="form-control mb-3"
-      />
-      <button class="btn btn-primary w-100">Login</button>
-    </form>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required />
+          </div>
 
-    <p class="text-center mt-3">Don't have an account?</p>
-    <a href="/register" class="btn btn-success w-100">Sign Up</a>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input name="password" type="password" class="form-control" required />
+          </div>
+
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary">Login</button>
+          </div>
+        </form>
+
+        <div class="text-center">
+          <p class="text-muted mb-2">Don't have an account?</p>
+          <a href="/register" class="btn btn-outline-secondary btn-sm">
+            Create Account
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-
 {% endblock %}

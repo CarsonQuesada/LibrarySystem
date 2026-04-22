@@ -1,47 +1,54 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
 
-<h2 class="mb-4">Admin Dashboard</h2>
+{% block content %}
 
-<div class="row">
-  <!-- BOOKS -->
+<div class="mb-4">
+  <h2 class="mb-1">Admin Dashboard</h2>
+  <p class="text-muted mb-0">
+    View system totals and access common administrative actions.
+  </p>
+</div>
+
+<div class="row g-3 mb-4">
   <div class="col-md-4">
-    <div class="card text-center">
+    <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
-        <h5>Total Books</h5>
-        <h2>{{ total_books }}</h2>
+        <div class="text-muted small mb-2">Total Books</div>
+        <div class="display-6 fw-semibold mb-0">{{ total_books }}</div>
       </div>
     </div>
   </div>
 
-  <!-- USERS -->
   <div class="col-md-4">
-    <div class="card text-center">
+    <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
-        <h5>Total Users</h5>
-        <h2>{{ total_users }}</h2>
+        <div class="text-muted small mb-2">Total Users</div>
+        <div class="display-6 fw-semibold mb-0">{{ total_users }}</div>
       </div>
     </div>
   </div>
 
-  <!-- LOANS -->
   <div class="col-md-4">
-    <div class="card text-center">
+    <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
-        <h5>Active Loans</h5>
-        <h2>{{ active_loans }}</h2>
+        <div class="text-muted small mb-2">Active Loans</div>
+        <div class="display-6 fw-semibold mb-0">{{ active_loans }}</div>
       </div>
     </div>
   </div>
 </div>
 
-<hr class="my-4" />
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Quick Actions</h5>
 
-<h4>Quick Actions</h4>
-
-<div class="d-flex gap-3 mt-3">
-  <a href="/admin/books/add" class="btn btn-success">Add Book</a>
-  <a href="/admin/loans" class="btn btn-info">View Loans</a>
-  <a href="/admin/users" class="btn btn-warning">Manage Users</a>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/admin/books/add" class="btn btn-primary">Add Book</a>
+      <a href="/admin/loans" class="btn btn-outline-secondary">View Loans</a>
+      <a href="/admin/users" class="btn btn-outline-secondary">Manage Users</a>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

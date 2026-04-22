@@ -1,61 +1,98 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}My Account{% endblock %}
 
-<h2 class="mb-4">My Account</h2>
+{% block content %}
 
-<!-- PROFILE -->
-<div class="card mb-4">
-  <div class="card-body">
-    <h5 class="card-title">Profile</h5>
-    <p><strong>Name:</strong> {{ user.name }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-  </div>
+<div class="mb-4">
+  <h2 class="mb-1">My Account</h2>
+  <p class="text-muted mb-0">View your profile and current borrowing activity.</p>
 </div>
 
-<!-- LOANS -->
-<div class="card">
-  <div class="card-body">
-    <h5 class="card-title mb-3">My Borrowed Books</h5>
+<div class="row g-4">
+  <!-- PROFILE -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Profile</h5>
 
-    {% if loans %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Loan Date</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+        <div class="mb-3">
+          <div class="text-muted small">Name</div>
+          <div class="fw-semibold">{{ user.name }}</div>
+        </div>
 
-      <tbody>
-        {% for loan in loans %}
-        <tr>
-          <td>{{ loan.book.title }}</td>
-          <td>{{ loan.book.author }}</td>
-          <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
-          <td>
-            {% if loan.returned %}
-            <span class="badge bg-success">Returned</span>
-            {% else %}
-            <span class="badge bg-warning text-dark">Active</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if not loan.returned %}
-            <a href="/return/{{ loan.id }}" class="btn btn-warning btn-sm">
-              Return
-            </a>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        <div>
+          <div class="text-muted small">Email</div>
+          <div class="fw-semibold">{{ user.email }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    {% else %}
-    <p>No borrowed books yet.</p>
-    {% endif %}
+  <!-- LOANS -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0">My Borrowed Books</h5>
+          {% if loans %}
+          <span class="badge bg-light text-dark border">
+            {{ loans|length }} total
+          </span>
+          {% endif %}
+        </div>
+
+        {% if loans %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Loan Date</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for loan in loans %}
+              <tr>
+                <td class="fw-semibold">{{ loan.book.title }}</td>
+                <td>{{ loan.book.author }}</td>
+                <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
+                <td>
+                  {% if loan.returned %}
+                  <span class="badge bg-success-subtle text-success border">
+                    Returned
+                  </span>
+                  {% else %}
+                  <span class="badge bg-warning-subtle text-dark border">
+                    Active
+                  </span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if not loan.returned %}
+                  <a href="/return/{{ loan.id }}" class="btn btn-sm btn-outline-primary">
+                    Return
+                  </a>
+                  {% else %}
+                  <span class="text-muted small">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% else %}
+        <div class="text-center py-4">
+          <h6 class="mb-1">No borrowed books</h6>
+          <p class="text-muted mb-0">Books you borrow will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 

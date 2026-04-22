@@ -1,60 +1,107 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
 
-<h2 class="mb-4">Manage Users</h2>
+{% block content %}
 
-<form method="GET" action="/admin/users" class="mb-4 d-flex gap-2">
-  <input
-    type="text"
-    name="q"
-    class="form-control"
-    placeholder="Search users by name or email"
-    value="{{ request.args.get('q', '') }}"
-  />
-  <button type="submit" class="btn btn-primary">Search</button>
-</form>
+<div class="mb-4">
+  <h2 class="mb-1">Manage Users</h2>
+  <p class="text-muted mb-0">
+    Search users, review roles, and manage librarian access.
+  </p>
+</div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/admin/users" class="row g-2 align-items-center">
+      <div class="col-md-9 col-lg-10">
+        <input
+          type="text"
+          name="q"
+          class="form-control"
+          placeholder="Search by name or email"
+          value="{{ request.args.get('q', '') }}"
+        />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-  <tbody>
-    {% for user in users %}
-    <tr>
-      <td>{{ user.id }}</td>
-      <td>{{ user.name }}</td>
-      <td>{{ user.email }}</td>
-      <td>
-        {% if user.is_librarian %}
-        <span class="badge bg-warning text-dark">Librarian</span>
-        {% else %}
-        <span class="badge bg-secondary">User</span>
-        {% endif %}
-      </td>
-      <td>
-        {% if not user.is_librarian %}
-            <form method="POST" action="/admin/users/{{ user.id }}/promote" style="display:inline;">
-            <button type="submit" class="btn btn-success btn-sm">Promote</button>
-            </form>
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    {% if users %}
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
 
-        {% elif user.id != current_user.id %}
-            <form method="POST" action="/admin/users/{{ user.id }}/demote" style="display:inline;">
-            <button type="submit" class="btn btn-danger btn-sm">Demote</button>
-            </form>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td class="text-muted">{{ user.id }}</td>
+            <td class="fw-semibold">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              {% if user.is_librarian %}
+              <span class="badge bg-light text-dark border">Librarian</span>
+              {% else %}
+              <span class="badge bg-secondary-subtle text-dark border">User</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              {% if not user.is_librarian %}
+              <form
+                method="POST"
+                action="/admin/users/{{ user.id }}/promote"
+                class="d-inline"
+              >
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                  Promote
+                </button>
+              </form>
 
-        {% else %}
-            <span class="text-muted">Current Admin</span>
-        {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+              {% elif user.id != current_user.id %}
+              <form
+                method="POST"
+                action="/admin/users/{{ user.id }}/demote"
+                class="d-inline"
+              >
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  Demote
+                </button>
+              </form>
+
+              {% else %}
+              <span class="text-muted small">Current Admin</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="text-center py-4">
+      {% if request.args.get('q') %}
+      <h6 class="mb-1">No matching users found</h6>
+      <p class="text-muted mb-0">Try a different name or email.</p>
+      {% else %}
+      <h6 class="mb-1">No users to display</h6>
+      <p class="text-muted mb-0">User accounts will appear here.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
 
 {% endblock %}

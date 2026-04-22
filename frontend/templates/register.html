@@ -1,24 +1,80 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
 
-<h2>Sign Up</h2>
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+  <div class="w-100" style="max-width: 420px;">
 
-<form method="POST">
-  <input name="name" placeholder="Name" class="form-control mb-2" required />
-  <input name="email" placeholder="Email" class="form-control mb-2" required />
-  <input
-    name="password"
-    type="password"
-    placeholder="Password"
-    class="form-control mb-3"
-  />
+    <div class="text-center mb-4">
+      <h1 class="h3 mb-2">Library System</h1>
+      <p class="text-muted mb-0">Create an account to start using the system.</p>
+    </div>
 
-  <input
-    name="confirm_password"
-    type="password"
-    placeholder="Confirm Password"
-    class="form-control mb-3"
-  />
-  <button class="btn btn-success">Create Account</button>
-</form>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-4 text-center">Create Account</h2>
 
+        <form method="POST">
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              class="form-control"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              class="form-control"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              class="form-control"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input
+              id="confirm_password"
+              name="confirm_password"
+              type="password"
+              class="form-control"
+              placeholder="Re-enter your password"
+              required
+            />
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </div>
+        </form>
+
+        <div class="text-center">
+          <p class="text-muted mb-2">Already have an account?</p>
+          <a href="/login" class="btn btn-outline-secondary btn-sm">Back to Login</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 {% endblock %}

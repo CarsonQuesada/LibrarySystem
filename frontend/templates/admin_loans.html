@@ -1,43 +1,78 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block title %}All Loans{% endblock %}
 
-<h2 class="mb-4">All Loans (Admin)</h2>
+{% block content %}
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Book</th>
-      <th>Author</th>
-      <th>Loan Date</th>
-      <th>Status</th>
-    </tr>
-  </thead>
+<div class="mb-4">
+  <h2 class="mb-1">All Loans</h2>
+  <p class="text-muted mb-0">
+    View all borrowing activity across users.
+  </p>
+</div>
 
-  <tbody>
-    {% for loan in loans %}
-    <tr>
-      <td>{{ loan.user.name }}</td>
-      <td>{{ loan.book.title }}</td>
-      <td>{{ loan.book.author }}</td>
-      <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
-      <td>
-        {% if loan.returned %}
-        <span class="badge bg-success">Returned</span>
-        {% else %}
-        <span class="badge bg-warning text-dark">Active</span>
-        {% endif %}
-      </td>
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
 
-      <td>
-        {% if not loan.returned %}
-        <a href="/return/{{ loan.id }}" class="btn btn-warning btn-sm">
-          Force Return
-        </a>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    {% if loans %}
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>User</th>
+            <th>Book</th>
+            <th>Author</th>
+            <th>Loan Date</th>
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td class="fw-semibold">{{ loan.user.name }}</td>
+            <td>{{ loan.book.title }}</td>
+            <td>{{ loan.book.author }}</td>
+            <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
+
+            <td>
+              {% if loan.returned %}
+              <span class="badge bg-success-subtle text-success border">
+                Returned
+              </span>
+              {% else %}
+              <span class="badge bg-warning-subtle text-dark border">
+                Active
+              </span>
+              {% endif %}
+            </td>
+
+            <td class="text-end">
+              {% if not loan.returned %}
+              <a
+                href="/return/{{ loan.id }}"
+                class="btn btn-sm btn-outline-danger"
+              >
+                Force Return
+              </a>
+              {% else %}
+              <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="text-center py-4">
+      <h6 class="mb-1">No loans found</h6>
+      <p class="text-muted mb-0">Loan records will appear here.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
 
 {% endblock %}
