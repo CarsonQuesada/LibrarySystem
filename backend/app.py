@@ -68,7 +68,16 @@ def home():
     if "user_id" not in session:
         return redirect("/login")
 
-    books = Book.query.all()
+    q = request.args.get("q", "").strip()
+
+    if q:
+        books = Book.query.filter(
+            (Book.title.contains(q)) |
+            (Book.author.contains(q))
+        ).all()
+    else:
+        books = Book.query.all()
+
     return render_template("index.html", books=books)
 
 # ---------------- ADMIN: DASHBOARD ----------------
