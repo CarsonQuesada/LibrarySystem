@@ -148,7 +148,16 @@ def admin_loans():
     if not user or not user.is_librarian:
         return "Unauthorized", 403
 
-    loans = Loan.query.all()
+    q = request.args.get("q", "").strip()
+
+    if q:
+        loans = Loan.query.join(LibraryUser).join(Book).filter(
+            (LibraryUser.name.contains(q)) |
+            (LibraryUser.email.contains(q)) |
+            (Book.title.contains(q))
+        ).all()
+    else:
+        loans = Loan.query.all()
 
     return render_template("admin_loans.html", loans=loans)
 
