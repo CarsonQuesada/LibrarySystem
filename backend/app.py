@@ -160,12 +160,15 @@ def edit_book(book_id):
         book.author = request.form["author"]
         book.isbn = request.form["isbn"]
 
-        copy_count = int(request.form["copy_count"])
-        book.copy_count = copy_count
+        new_copy_count = int(request.form["copy_count"])
+        checked_out = book.copy_count - book.available_copies
 
-        # 🔥 Keep available copies consistent
-        if book.available_copies > copy_count:
-            book.available_copies = copy_count
+        if new_copy_count < checked_out:
+            flash(f"Cannot reduce below {checked_out} (currently checked out).")
+            return redirect(f"/admin/books/{book_id}/edit")
+
+        book.copy_count = new_copy_count
+        book.available_copies = new_copy_count - checked_out
 
         db.session.commit()
         return redirect("/admin/dashboard")
@@ -282,7 +285,9 @@ def return_book(loan_id):
         book = Book.query.get(loan.book_id)
 
         loan.returned = True
-        book.available_copies += 1
+
+        if book.available_copies < book.copy_count:
+            book.available_copies += 1
 
         db.session.commit()
 
