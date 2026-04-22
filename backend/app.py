@@ -136,6 +136,7 @@ def add_book_admin():
     db.session.add(book)
     db.session.commit()
 
+    flash(f"Successfully added {book.title}.", "success")
     return redirect("/")
 
 # ---------------- ADMIN: VIEW LOANS ----------------
@@ -182,13 +183,14 @@ def edit_book(book_id):
         checked_out = book.copy_count - book.available_copies
 
         if new_copy_count < checked_out:
-            flash(f"Cannot reduce below {checked_out} (currently checked out).")
+            flash(f"Cannot reduce below {checked_out} (currently checked out).", "warning")
             return redirect(f"/admin/books/{book_id}/edit")
 
         book.copy_count = new_copy_count
         book.available_copies = new_copy_count - checked_out
 
         db.session.commit()
+        flash(f"Successfully updated {book.title}.", "success")
         return redirect("/admin/dashboard")
 
     return render_template("edit_book.html", book=book)
@@ -210,13 +212,12 @@ def delete_book(book_id):
 
     # 🔥 Prevent deleting if copies are borrowed
     if book.available_copies < book.copy_count:
-        flash("Cannot delete book: copies are currently borrowed.")
+        flash("Cannot delete book: copies are currently borrowed.", "danger")
         return redirect("/")
 
     db.session.delete(book)
     db.session.commit()
-
-    flash("Book deleted successfully.")
+    flash("Book deleted successfully.", "success")
     return redirect("/")
 
 # ---------------- ADMIN: MANAGE USERS ----------------
@@ -257,7 +258,7 @@ def promote_user(user_id):
 
     user.is_librarian = True
     db.session.commit()
-    flash("User promoted to librarian.")
+    flash("User promoted to librarian.", "success")
 
     return redirect("/admin/users")
 
@@ -273,7 +274,7 @@ def demote_user(user_id):
 
     # prevent self-demotion
     if user_id == current_user.id:
-        flash("You cannot demote yourself.")
+        flash("You cannot demote yourself.", "warning")
         return redirect("/admin/users")
 
     user = LibraryUser.query.get(user_id)
@@ -282,7 +283,7 @@ def demote_user(user_id):
 
     user.is_librarian = False
     db.session.commit()
-    flash("User demoted.")
+    flash("User demoted.", "info")
 
     return redirect("/admin/users")
 
@@ -314,6 +315,7 @@ def register():
         db.session.commit()
 
         session["user_id"] = new_user.id
+        flash("Registration successful! Welcome to the library.", "success")
         return redirect("/")
 
     return render_template("register.html")
@@ -350,6 +352,7 @@ def borrow(book_id):
 
         db.session.add(loan)
         db.session.commit()
+        flash(f"Successfully borrowed {book.title}.", "success")
 
     return redirect("/")
 
@@ -363,7 +366,7 @@ def return_book(loan_id):
 
     # 🔒 Ensure the loan belongs to the current user
     if not loan or loan.user_id != session["user_id"]:
-        flash("You cannot return this book.")
+        flash("You cannot return this book.", "danger")
         return redirect("/account")
     
     if not loan.returned:
@@ -375,6 +378,7 @@ def return_book(loan_id):
             book.available_copies += 1
 
         db.session.commit()
+        flash(f"Successfully returned {book.title}.", "success")
 
     return redirect("/account")
 
