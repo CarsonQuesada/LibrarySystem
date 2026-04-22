@@ -356,31 +356,34 @@ def borrow(book_id):
 
     return redirect("/")
 
-# ---------------- RETURN ----------------
-@app.route("/return/<int:loan_id>")
-def return_book(loan_id):
+# ---------------- RETURN BOOK (ADMIN) ----------------
+@app.route("/admin/loans/<int:loan_id>/return", methods=["POST"])
+def admin_return_loan(loan_id):
     if "user_id" not in session:
         return redirect("/login")
 
+    current_user = LibraryUser.query.get(session["user_id"])
+    if not current_user or not current_user.is_librarian:
+        return "Unauthorized", 403
+
     loan = Loan.query.get(loan_id)
+    if not loan:
+        flash("Loan not found.", "danger")
+        return redirect("/admin/loans")
 
-    # 🔒 Ensure the loan belongs to the current user
-    if not loan or loan.user_id != session["user_id"]:
-        flash("You cannot return this book.", "danger")
-        return redirect("/account")
-    
-    if not loan.returned:
-        book = Book.query.get(loan.book_id)
+    if loan.returned:
+        flash("This loan is already marked as returned.", "info")
+        return redirect("/admin/loans")
 
-        loan.returned = True
+    book = Book.query.get(loan.book_id)
+    loan.returned = True
 
-        if book.available_copies < book.copy_count:
-            book.available_copies += 1
+    if book.available_copies < book.copy_count:
+        book.available_copies += 1
 
-        db.session.commit()
-        flash(f"Successfully returned {book.title}.", "success")
-
-    return redirect("/account")
+    db.session.commit()
+    flash(f'"{book.title}" was returned successfully.', "success")
+    return redirect("/admin/loans")
 
 # ---------------- ACCOUNT ----------------
 @app.route("/account")

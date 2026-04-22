@@ -64,12 +64,11 @@
 
             <td class="text-end">
               {% if not loan.returned %}
-              <a
-                href="/return/{{ loan.id }}"
-                class="btn btn-sm btn-outline-danger"
-              >
-                Force Return
-              </a>
+              <form method="POST" action="/admin/loans/{{ loan.id }}/return" class="d-inline">
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                  Return
+                </button>
+              </form>
               {% else %}
               <span class="text-muted small">—</span>
               {% endif %}

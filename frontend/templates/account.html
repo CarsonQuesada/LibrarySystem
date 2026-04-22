@@ -49,8 +49,7 @@
                 <th>Title</th>
                 <th>Author</th>
                 <th>Loan Date</th>
-                <th>Status</th>
-                <th class="text-end">Action</th>
+                <th class="text-end">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -59,7 +58,7 @@
                 <td class="fw-semibold">{{ loan.book.title }}</td>
                 <td>{{ loan.book.author }}</td>
                 <td>{{ loan.loan_date.strftime("%Y-%m-%d") }}</td>
-                <td>
+                <td class="text-end">
                   {% if loan.returned %}
                   <span class="badge bg-success-subtle text-success border">
                     Returned
@@ -68,15 +67,6 @@
                   <span class="badge bg-warning-subtle text-dark border">
                     Active
                   </span>
-                  {% endif %}
-                </td>
-                <td class="text-end">
-                  {% if not loan.returned %}
-                  <a href="/return/{{ loan.id }}" class="btn btn-sm btn-outline-primary">
-                    Return
-                  </a>
-                  {% else %}
-                  <span class="text-muted small">—</span>
                   {% endif %}
                 </td>
               </tr>
