@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block content %}
+
+<h2 class="mb-4">Manage Users</h2>
+
+<form method="GET" action="/admin/users" class="mb-4 d-flex gap-2">
+  <input
+    type="text"
+    name="q"
+    class="form-control"
+    placeholder="Search users by name or email"
+    value="{{ request.args.get('q', '') }}"
+  />
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.name }}</td>
+      <td>{{ user.email }}</td>
+      <td>
+        {% if user.is_librarian %}
+        <span class="badge bg-warning text-dark">Librarian</span>
+        {% else %}
+        <span class="badge bg-secondary">User</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if not user.is_librarian %}
+            <form method="POST" action="/admin/users/{{ user.id }}/promote" style="display:inline;">
+            <button type="submit" class="btn btn-success btn-sm">Promote</button>
+            </form>
+
+        {% elif user.id != current_user.id %}
+            <form method="POST" action="/admin/users/{{ user.id }}/demote" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-sm">Demote</button>
+            </form>
+
+        {% else %}
+            <span class="text-muted">Current Admin</span>
+        {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

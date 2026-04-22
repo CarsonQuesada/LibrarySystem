@@ -201,6 +201,73 @@ def delete_book(book_id):
     flash("Book deleted successfully.")
     return redirect("/")
 
+# ---------------- ADMIN: MANAGE USERS ----------------
+@app.route("/admin/users")
+def admin_users():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    current_user = LibraryUser.query.get(session["user_id"])
+    if not current_user or not current_user.is_librarian:
+        return "Unauthorized", 403
+
+    q = request.args.get("q", "").strip()
+
+    if q:
+        users = LibraryUser.query.filter(
+            (LibraryUser.name.contains(q)) |
+            (LibraryUser.email.contains(q))
+        ).all()
+    else:
+        users = LibraryUser.query.all()
+
+    return render_template("manage_users.html", users=users)
+
+# ---------------- ADMIN: PROMOTE USER ----------------
+@app.route("/admin/users/<int:user_id>/promote", methods=["POST"])
+def promote_user(user_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    current_user = LibraryUser.query.get(session["user_id"])
+    if not current_user or not current_user.is_librarian:
+        return "Unauthorized", 403
+
+    user = LibraryUser.query.get(user_id)
+    if not user:
+        return "User not found", 404
+
+    user.is_librarian = True
+    db.session.commit()
+    flash("User promoted to librarian.")
+
+    return redirect("/admin/users")
+
+# ---------------- ADMIN: DEMOTE USER ----------------
+@app.route("/admin/users/<int:user_id>/demote", methods=["POST"])
+def demote_user(user_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    current_user = LibraryUser.query.get(session["user_id"])
+    if not current_user or not current_user.is_librarian:
+        return "Unauthorized", 403
+
+    # prevent self-demotion
+    if user_id == current_user.id:
+        flash("You cannot demote yourself.")
+        return redirect("/admin/users")
+
+    user = LibraryUser.query.get(user_id)
+    if not user:
+        return "User not found", 404
+
+    user.is_librarian = False
+    db.session.commit()
+    flash("User demoted.")
+
+    return redirect("/admin/users")
+
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
