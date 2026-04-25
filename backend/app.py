@@ -558,6 +558,43 @@ def join_waitlist(book_id):
     flash(f'You were added to the waitlist for "{book.title}".', "success")
     return redirect("/")
 
+# -----------------ADMIN: WAITLIST -----------------
+@app.route("/admin/waitlist")
+def admin_waitlist():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user = LibraryUser.query.get(session["user_id"])
+    if not user or not user.is_librarian:
+        return "Unauthorized", 403
+
+    # Get all waitlist entries sorted by book and time
+    entries = WaitlistEntry.query.order_by(
+        WaitlistEntry.book_id,
+        WaitlistEntry.created_at.asc()
+    ).all()
+
+    # Build positions per book
+    waitlist_data = []
+    book_groups = {}
+
+    for entry in entries:
+        if entry.book_id not in book_groups:
+            book_groups[entry.book_id] = []
+        book_groups[entry.book_id].append(entry)
+
+    for book_id, group in book_groups.items():
+        for i, entry in enumerate(group, start=1):
+            waitlist_data.append({
+                "book_title": entry.book.title,
+                "user_name": entry.user.name,
+                "email": entry.user.email,
+                "position": i,
+                "joined": entry.created_at
+            })
+
+    return render_template("admin_waitlist.html", waitlist_data=waitlist_data)
+
 # ---------------- CANCEL WAITLIST ----------------
 @app.route("/waitlist/<int:entry_id>/cancel", methods=["POST"])
 def cancel_waitlist(entry_id):

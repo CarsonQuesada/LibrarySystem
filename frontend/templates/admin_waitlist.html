@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block title %}Waitlist{% endblock %} {% block
+content %}
+
+<div class="mb-4">
+  <h2>Waitlist Overview</h2>
+  <p class="text-muted">All users currently waiting for books.</p>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    {% if waitlist_data %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Book</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Position</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in waitlist_data %}
+          <tr>
+            <td class="fw-semibold">{{ entry.book_title }}</td>
+            <td>{{ entry.user_name }}</td>
+            <td>{{ entry.email }}</td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                #{{ entry.position }}
+              </span>
+            </td>
+            <td>{{ entry.joined.strftime("%Y-%m-%d %H:%M") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="text-center py-4">
+      <h6>No waitlist entries</h6>
+      <p class="text-muted">Nobody is currently waiting for books.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
