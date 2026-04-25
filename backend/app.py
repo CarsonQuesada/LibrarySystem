@@ -514,10 +514,19 @@ def join_waitlist(book_id):
         WaitlistEntry.created_at.asc()
     ).all()
 
-    reserved_slots = min(book.available_copies, len(entries))
-    effective_available = book.available_copies - reserved_slots
+    # reserved_slots = min(book.available_copies, len(entries))
+    # effective_available = book.available_copies - reserved_slots
 
-    if effective_available > 0:
+    # if effective_available > 0:
+    #     flash("This book is currently available. You can borrow it directly.", "info")
+    #     return redirect("/")
+
+    entries = WaitlistEntry.query.filter_by(book_id=book_id)\
+    .order_by(WaitlistEntry.created_at.asc())\
+    .all()
+
+    # Only block waitlist if there is NO queue and copies are available
+    if book.available_copies > 0 and len(entries) == 0:
         flash("This book is currently available. You can borrow it directly.", "info")
         return redirect("/")
 
