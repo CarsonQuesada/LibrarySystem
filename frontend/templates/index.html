@@ -43,22 +43,47 @@
         <div class="mt-auto">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-              {% if book.available_copies > 0 %}
-              <span class="badge bg-light text-dark border">Available</span>
+              {% if book.id in eligible_waitlist_book_ids and book.available_copies > 0 %}
+                <span class="badge bg-light text-dark border">Ready for Pickup</span>
+              {% elif effective_available_copies[book.id] > 0 %}
+                <span class="badge bg-light text-dark border">
+                  Available ({{ effective_available_copies[book.id] }})
+                </span>
+              {% elif book.available_copies > 0 %}
+                <span class="badge bg-secondary">Reserved</span>
               {% else %}
-              <span class="badge bg-secondary">Unavailable</span>
+                <span class="badge bg-secondary">Unavailable</span>
               {% endif %}
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-              {% if book.available_copies > 0 %}
-              <a href="/borrow/{{ book.id }}" class="btn btn-sm btn-primary">
-                Borrow
-              </a>
+              {% if book.id in active_loan_book_ids %}
+                <button class="btn btn-sm btn-outline-secondary" disabled>
+                  Already Borrowed
+                </button>
+
+              {% elif book.id in eligible_waitlist_book_ids and book.available_copies > 0 %}
+                <a href="/borrow/{{ book.id }}" class="btn btn-sm btn-primary">
+                  Borrow
+                </a>
+
+              {% elif book.id in waitlisted_book_ids %}
+                <button class="btn btn-sm btn-outline-secondary" disabled>
+                  Waitlisted
+                  {% if book.id in waitlist_positions %}
+                    (#{{ waitlist_positions[book.id] }})
+                  {% endif %}
+                </button>
+
+              {% elif effective_available_copies[book.id] > 0 %}
+                <a href="/borrow/{{ book.id }}" class="btn btn-sm btn-primary">Borrow</a>
+
               {% else %}
-              <button class="btn btn-sm btn-outline-secondary" disabled>
-                Borrow
-              </button>
+                <form method="POST" action="/waitlist/{{ book.id }}/join" class="m-0">
+                  <button type="submit" class="btn btn-sm btn-outline-primary">
+                    Join Waitlist
+                  </button>
+                </form>
               {% endif %}
             </div>
           </div>

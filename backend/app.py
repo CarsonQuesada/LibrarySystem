@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash # type: ignore
-from models import db, Book, LibraryUser, Loan
+from models import db, Book, LibraryUser, Loan, WaitlistEntry
 from datetime import datetime
 from auth import hash_password, verify_password
 import os
@@ -68,6 +68,7 @@ def home():
     if "user_id" not in session:
         return redirect("/login")
 
+    user_id = session["user_id"]
     q = request.args.get("q", "").strip()
 
     if q:
@@ -78,7 +79,51 @@ def home():
     else:
         books = Book.query.all()
 
-    return render_template("index.html", books=books)
+    active_loan_book_ids = {
+        loan.book_id
+        for loan in Loan.query.filter_by(user_id=user_id, returned=False).all()
+    }
+
+    waitlisted_book_ids = {
+        entry.book_id
+        for entry in WaitlistEntry.query.filter_by(user_id=user_id).all()
+    }
+
+    waitlist_positions = {}
+    eligible_waitlist_book_ids = set()
+    fully_reserved_book_ids = set()
+    effective_available_copies = {}
+
+    for book in books:
+        entries = WaitlistEntry.query.filter_by(book_id=book.id).order_by(
+            WaitlistEntry.created_at.asc()
+        ).all()
+
+        queue_length = len(entries)
+        reserved_slots = min(book.available_copies, queue_length)
+        effective_available = book.available_copies - reserved_slots
+        effective_available_copies[book.id] = effective_available
+
+        for i, entry in enumerate(entries, start=1):
+            if entry.user_id == user_id:
+                waitlist_positions[book.id] = i
+                if i <= reserved_slots:
+                    eligible_waitlist_book_ids.add(book.id)
+                break
+
+        if effective_available == 0 and book.available_copies > 0 and book.id not in eligible_waitlist_book_ids:
+            fully_reserved_book_ids.add(book.id)
+
+    return render_template(
+        "index.html",
+        books=books,
+        active_loan_book_ids=active_loan_book_ids,
+        waitlisted_book_ids=waitlisted_book_ids,
+        waitlist_positions=waitlist_positions,
+        eligible_waitlist_book_ids=eligible_waitlist_book_ids,
+        fully_reserved_book_ids=fully_reserved_book_ids,
+        effective_available_copies=effective_available_copies
+    )
 
 # ---------------- ADMIN: DASHBOARD ----------------
 @app.route("/admin/dashboard")
@@ -344,16 +389,49 @@ def borrow(book_id):
     if "user_id" not in session:
         return redirect("/login")
 
+    user_id = session["user_id"]
     book = Book.query.get(book_id)
 
-    if book and book.available_copies > 0:
-        loan = Loan(user_id=session["user_id"], book_id=book_id)
-        book.available_copies -= 1
+    if not book:
+        flash("Book not found.", "danger")
+        return redirect("/")
 
-        db.session.add(loan)
-        db.session.commit()
-        flash(f"Successfully borrowed {book.title}.", "success")
+    # Check first person in waitlist order
+    first_waitlist_entry = WaitlistEntry.query.filter_by(book_id=book_id)\
+        .order_by(WaitlistEntry.created_at.asc())\
+        .first()
 
+    if book.available_copies <= 0:
+        flash(f'"{book.title}" is currently unavailable. Join the waitlist instead.', "warning")
+        return redirect("/")
+
+    # If there is a waitlist and current user is not first, block borrow
+    if first_waitlist_entry and first_waitlist_entry.user_id != user_id:
+        flash("This book is currently reserved for someone earlier in the waitlist.", "warning")
+        return redirect("/")
+
+    # Prevent duplicate active loan
+    existing_loan = Loan.query.filter_by(
+        user_id=user_id,
+        book_id=book_id,
+        returned=False
+    ).first()
+
+    if existing_loan:
+        flash("You already have this book checked out.", "warning")
+        return redirect("/")
+
+    loan = Loan(user_id=user_id, book_id=book_id)
+    book.available_copies -= 1
+    db.session.add(loan)
+
+    # If current user was first in waitlist, remove their entry
+    if first_waitlist_entry and first_waitlist_entry.user_id == user_id:
+        db.session.delete(first_waitlist_entry)
+
+    db.session.commit()
+
+    flash(f'Borrowed "{book.title}".', "success")
     return redirect("/")
 
 # ---------------- RETURN BOOK (ADMIN) ----------------
@@ -398,11 +476,102 @@ def account():
         returned=False
     ).all()
 
+    waitlist_entries = WaitlistEntry.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(WaitlistEntry.created_at.asc()).all()
+
+    waitlist_positions = {}
+    for entry in waitlist_entries:
+        position = WaitlistEntry.query.filter(
+            WaitlistEntry.book_id == entry.book_id,
+            WaitlistEntry.created_at < entry.created_at
+        ).count() + 1
+        waitlist_positions[entry.id] = position
+
     return render_template(
         "account.html",
         user=user,
-        loans=loans
+        loans=loans,
+        waitlist_entries=waitlist_entries,
+        waitlist_positions=waitlist_positions
     )
+
+# ---------------- JOIN WAITLIST ----------------
+@app.route("/waitlist/<int:book_id>/join", methods=["POST"])
+def join_waitlist(book_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+    book = Book.query.get(book_id)
+
+    if not book:
+        flash("Book not found.", "danger")
+        return redirect("/")
+
+    # Do not allow waitlisting if the book is currently available
+    entries = WaitlistEntry.query.filter_by(book_id=book_id).order_by(
+        WaitlistEntry.created_at.asc()
+    ).all()
+
+    reserved_slots = min(book.available_copies, len(entries))
+    effective_available = book.available_copies - reserved_slots
+
+    if effective_available > 0:
+        flash("This book is currently available. You can borrow it directly.", "info")
+        return redirect("/")
+
+    # Do not allow if user already has an active loan for this book
+    existing_loan = Loan.query.filter_by(
+        user_id=user_id,
+        book_id=book_id,
+        returned=False
+    ).first()
+
+    if existing_loan:
+        flash("You already have this book checked out.", "warning")
+        return redirect("/")
+
+    # Do not allow duplicate waitlist entries
+    existing_waitlist = WaitlistEntry.query.filter_by(
+        user_id=user_id,
+        book_id=book_id
+    ).first()
+
+    if existing_waitlist:
+        flash("You are already on the waitlist for this book.", "info")
+        return redirect("/")
+
+    entry = WaitlistEntry(user_id=user_id, book_id=book_id)
+    db.session.add(entry)
+    db.session.commit()
+
+    flash(f'You were added to the waitlist for "{book.title}".', "success")
+    return redirect("/")
+
+# ---------------- CANCEL WAITLIST ----------------
+@app.route("/waitlist/<int:entry_id>/cancel", methods=["POST"])
+def cancel_waitlist(entry_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    entry = WaitlistEntry.query.get(entry_id)
+
+    if not entry:
+        flash("Waitlist entry not found.", "danger")
+        return redirect("/account")
+
+    if entry.user_id != session["user_id"]:
+        flash("You cannot cancel this waitlist entry.", "danger")
+        return redirect("/account")
+
+    book_title = entry.book.title
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash(f'You were removed from the waitlist for "{book_title}".', "success")
+    return redirect("/account")
 
 
 # ---------------- RUN ----------------

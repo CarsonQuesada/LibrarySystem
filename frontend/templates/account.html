@@ -28,9 +28,10 @@
     </div>
   </div>
 
-  <!-- LOANS -->
+  <!-- RIGHT COLUMN -->
   <div class="col-lg-8">
-    <div class="card border-0 shadow-sm">
+    <!-- LOANS -->
+    <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0">My Borrowed Books</h5>
@@ -74,11 +75,72 @@
             </tbody>
           </table>
         </div>
-
         {% else %}
         <div class="text-center py-4">
           <h6 class="mb-1">No borrowed books</h6>
           <p class="text-muted mb-0">Books you borrow will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- WAITLIST -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0">My Waitlist</h5>
+          {% if waitlist_entries %}
+          <span class="badge bg-light text-dark border">
+            {{ waitlist_entries|length }} total
+          </span>
+          {% endif %}
+        </div>
+
+        {% if waitlist_entries %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Joined</th>
+                <th>Position</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in waitlist_entries %}
+              <tr>
+                <td class="fw-semibold">{{ entry.book.title }}</td>
+                <td>{{ entry.book.author }}</td>
+                <td>{{ entry.created_at.strftime("%Y-%m-%d") }}</td>
+                <td>
+                  <span class="badge bg-light text-dark border">
+                    #{{ waitlist_positions[entry.id] }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <form
+                    method="POST"
+                    action="/waitlist/{{ entry.id }}/cancel"
+                    class="d-inline"
+                  >
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      Cancel
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+          <h6 class="mb-1">No waitlisted books</h6>
+          <p class="text-muted mb-0">
+            Books you add to the waitlist will appear here.
+          </p>
         </div>
         {% endif %}
       </div>

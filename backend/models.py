@@ -30,5 +30,9 @@ class Loan(db.Model):
 
 class WaitlistEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    book_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('library_user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship('LibraryUser')
+    book = db.relationship('Book')
