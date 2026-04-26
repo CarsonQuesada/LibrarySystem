@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, flash # type: ignore
-from models import db, Book, LibraryUser, Loan, WaitlistEntry
+from backend.models import db, Book, LibraryUser, Loan, WaitlistEntry
+from backend.auth import hash_password, verify_password
 from datetime import datetime
-from auth import hash_password, verify_password
 import os
 
 app = Flask(
@@ -396,6 +396,55 @@ def borrow(book_id):
         flash("Book not found.", "danger")
         return redirect("/")
 
+    # ✅ MOVE THIS UP HERE
+    existing_loan = Loan.query.filter_by(
+        user_id=user_id,
+        book_id=book_id,
+        returned=False
+    ).first()
+
+    if existing_loan:
+        flash("You already have this book", "warning")
+        return redirect("/")
+
+    # Waitlist logic
+    first_waitlist_entry = WaitlistEntry.query.filter_by(book_id=book_id)\
+        .order_by(WaitlistEntry.created_at.asc())\
+        .first()
+
+    # Availability check
+    if book.available_copies <= 0:
+        flash(f'"{book.title}" is currently unavailable. Join the waitlist instead.', "warning")
+        return redirect("/")
+
+    # Waitlist priority
+    if first_waitlist_entry and first_waitlist_entry.user_id != user_id:
+        flash("This book is currently reserved for someone earlier in the waitlist.", "warning")
+        return redirect("/")
+
+    # Borrow
+    loan = Loan(user_id=user_id, book_id=book_id)
+    book.available_copies -= 1
+    db.session.add(loan)
+
+    # Remove from waitlist if needed
+    if first_waitlist_entry and first_waitlist_entry.user_id == user_id:
+        db.session.delete(first_waitlist_entry)
+
+    db.session.commit()
+
+    flash(f'Borrowed "{book.title}".', "success")
+    return redirect("/")
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+    book = Book.query.get(book_id)
+
+    if not book:
+        flash("Book not found.", "danger")
+        return redirect("/")
+
     # Check first person in waitlist order
     first_waitlist_entry = WaitlistEntry.query.filter_by(book_id=book_id)\
         .order_by(WaitlistEntry.created_at.asc())\
@@ -418,7 +467,7 @@ def borrow(book_id):
     ).first()
 
     if existing_loan:
-        flash("You already have this book checked out.", "warning")
+        flash("You already have this book", "warning")
         return redirect("/")
 
     loan = Loan(user_id=user_id, book_id=book_id)
